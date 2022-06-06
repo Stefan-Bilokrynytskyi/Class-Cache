@@ -29,3 +29,30 @@ class Cache {
     return value;
   }
 }
+
+const speedTest = (fn, cachedFn, args) => {
+  const tmp = [];
+  const LOOP_COUNT = 10000;
+  let start = new Date().getTime();
+  for (let i = 0; i < LOOP_COUNT; i++) {
+    tmp.push(fn(...args));
+  }
+  let end = new Date().getTime();
+  let time = end - start;
+  console.log(`Time of simple function: ${time} ;`);
+
+  tmp.splice(0, tmp.length);
+
+  start = new Date().getTime();
+  for (let i = 0; i < LOOP_COUNT; i++) {
+    tmp.push(cachedFn.calculate(...args));
+  }
+  end = new Date().getTime();
+  time = end - start;
+  console.log(`Time of cached function: ${time} ;`);
+};
+
+const fib = (n) => (n <= 2 ? 1 : fib(n - 1) + fib(n - 2));
+const cachedFib = new Cache(fib);
+
+speedTest(fib, cachedFib, [25]);
