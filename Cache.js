@@ -19,15 +19,33 @@ class Cache {
     return JSON.stringify(arg) + ':' + typeof arg;
   }
 
+  #checkCacheSize() {
+    if (this.cache.size < this.length) return;
+
+    let min = this.priorityQueue.keys().next().value;
+    for (const time of this.priorityQueue.keys()) if (time < min) min = time;
+
+    const key = this.priorityQueue.get(min);
+    this.cache.delete(key);
+    this.priorityQueue.delete(min);
+  }
+
   calculate(...args) {
     const key = args.map(this.#generateKey).join('|');
 
     if (this.cache.has(key)) {
+      //console.log('From Cache:');
       return this.cache.get(key);
     }
-    const value = this.fn(...args);
-    this.cache.set(key, value);
 
+    //console.log('Calculate:');
+    const begin = process.hrtime.bigint();
+    const value = this.fn(...args);
+    const end = process.hrtime.bigint();
+
+    this.#checkCacheSize();
+    this.cache.set(key, value);
+    this.priorityQueue.set(end - begin, key);
     return value;
   }
 }
