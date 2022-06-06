@@ -1,9 +1,11 @@
 'use strict';
 
 class Cache {
-  constructor(fn) {
+  constructor(fn, length = 10) {
     this.fn = fn;
     this.cache = new Map();
+    this.length = length;
+    this.priorityQueue = new Map();
   }
 
   #generateKey(arg) {
