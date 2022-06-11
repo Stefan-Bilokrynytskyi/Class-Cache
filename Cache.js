@@ -1,11 +1,17 @@
 'use strict';
 
-class Cache {
-  constructor(fn, length = 10) {
+class CacheFunc {
+  constructor(fn, time, length = 10) {
     this.fn = fn;
     this.cache = new Map();
     this.length = length;
     this.priorityQueue = new Map();
+    this.time = time;
+  }
+
+  showCache() {
+    if (this.cache.size === 0) console.log('Cache is empty');
+    for (const val of this.cache.values()) console.log(val);
   }
 
   #generateKey(arg) {
@@ -17,6 +23,13 @@ class Cache {
       }
     }
     return JSON.stringify(arg) + ':' + typeof arg;
+  }
+
+  #timeInCache(key, leadTime) {
+    setTimeout(() => {
+      this.cache.delete(key);
+      this.priorityQueue.delete(leadTime);
+    }, this.time);
   }
 
   #checkCacheSize() {
@@ -34,22 +47,27 @@ class Cache {
     const key = args.map(this.#generateKey).join('|');
 
     if (this.cache.has(key)) {
-      //console.log('From Cache:');
+      // console.log('From Cache:');
       return this.cache.get(key);
     }
 
-    //console.log('Calculate:');
+    // console.log('Calculate:');
     const begin = process.hrtime.bigint();
     const value = this.fn(...args);
     const end = process.hrtime.bigint();
+    const leadTime = end - begin;
 
     this.#checkCacheSize();
     this.cache.set(key, value);
-    this.priorityQueue.set(end - begin, key);
+    this.priorityQueue.set(leadTime, key);
+    this.#timeInCache(key, leadTime);
     return value;
   }
 }
 
+// Usage
+
+/*
 const speedTest = (fn, cachedFn, args) => {
   const tmp = [];
   const LOOP_COUNT = 10000;
@@ -71,8 +89,24 @@ const speedTest = (fn, cachedFn, args) => {
   time = end - start;
   console.log(`Time of cached function: ${time} ;`);
 };
+*/
 
 const fib = (n) => (n <= 2 ? 1 : fib(n - 1) + fib(n - 2));
-const cachedFib = new Cache(fib);
+const cachedFib = new CacheFunc(fib, 4000, 3);
 
-speedTest(fib, cachedFib, [25]);
+const sleep = (msec) =>
+  new Promise((resolve) => {
+    setTimeout(resolve, msec);
+  });
+
+cachedFib.calculate(20);
+cachedFib.calculate(21);
+cachedFib.calculate(22);
+cachedFib.showCache();
+
+(async () => {
+  await sleep(4000);
+  cachedFib.showCache();
+})();
+
+// speedTest(fib, cachedFib, [25]);
