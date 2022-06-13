@@ -10,20 +10,18 @@ class CacheFunc {
     this.time = time;
   }
 
-  showCache() {
-    if (this.cache.size === 0) console.log('Cache is empty');
-    for (const val of this.cache.values()) console.log(val);
-  }
-
   #generateKey(arg) {
-    if (typeof arg === 'object') {
-      for (const field in arg) {
-        if (typeof arg[field] === 'function') {
-          arg[field] = arg[field].toString();
-        }
+    const type = typeof arg;
+    if (type === 'object') {
+      for (let field in arg) {
+        if (typeof field === 'symbol') field = field.toString();
+        arg[field] = this.#generateKey(arg[field]);
       }
-    }
-    return JSON.stringify(arg) + ':' + typeof arg;
+
+      return JSON.stringify(arg) + ':' + type;
+    } else if (type === 'symbol' || type === 'bigint' || type === 'function') {
+      return arg.toString() + ':' + type;
+    } else return JSON.stringify(arg) + ':' + type;
   }
 
   #timeInCache(key, leadTime) {
@@ -48,11 +46,11 @@ class CacheFunc {
     const key = args.map(this.#generateKey).join('|');
 
     if (this.cache.has(key)) {
-      // console.log('From Cache:');
+      //console.log('From Cache:');
       return this.cache.get(key);
     }
 
-    // console.log('Calculate:');
+    //console.log('Calculate:');
     const begin = process.hrtime.bigint();
     const value = this.#fn(...args);
     const end = process.hrtime.bigint();
@@ -65,7 +63,5 @@ class CacheFunc {
     return value;
   }
 }
-//const a = { a: 3, b: [12] };
-console.log(typeof Symbol('name').toString());
 
 module.exports = CacheFunc;
