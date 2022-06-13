@@ -1,5 +1,7 @@
 'use strict';
 
+const crypto = require('crypto');
+
 class CacheFunc {
   #fn;
   constructor(fn, time, length = 10) {
@@ -24,6 +26,11 @@ class CacheFunc {
     } else return JSON.stringify(arg) + ':' + type;
   }
 
+  #keyToHash(key) {
+    key = crypto.createHash('sha256').update(key).digest('hex');
+    return key;
+  }
+
   #timeInCache(key, leadTime) {
     setTimeout(() => {
       this.cache.delete(key);
@@ -43,14 +50,13 @@ class CacheFunc {
   }
 
   calculate(...args) {
-    const key = args.map(this.#generateKey).join('|');
+    let key = args.map(this.#generateKey).join('|');
+    key = this.#keyToHash(key);
 
     if (this.cache.has(key)) {
-      //console.log('From Cache:');
       return this.cache.get(key);
     }
 
-    //console.log('Calculate:');
     const begin = process.hrtime.bigint();
     const value = this.#fn(...args);
     const end = process.hrtime.bigint();
