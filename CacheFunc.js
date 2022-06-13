@@ -15,8 +15,7 @@ class CacheFunc {
   #generateKey(arg) {
     const type = typeof arg;
     if (type === 'object') {
-      for (let field in arg) {
-        if (typeof field === 'symbol') field = field.toString();
+      for (const field in arg) {
         arg[field] = this.#generateKey(arg[field]);
       }
 
