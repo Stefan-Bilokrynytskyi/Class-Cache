@@ -12,6 +12,14 @@ class CacheFunc {
     this.time = time;
   }
 
+  set fn(fn1) {
+    if (this.fn) {
+      this.#fn = fn1;
+      this.cache.clear();
+      this.priority.clear();
+    } else this.#fn = fn1;
+  }
+
   #generateKey(arg) {
     const type = typeof arg;
     if (type === 'object') {
