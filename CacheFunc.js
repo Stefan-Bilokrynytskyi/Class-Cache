@@ -12,12 +12,10 @@ class CacheFunc {
     this.time = time;
   }
 
-  set fn(fn1) {
-    if (this.fn) {
-      this.#fn = fn1;
-      this.cache.clear();
-      this.priority.clear();
-    } else this.#fn = fn1;
+  set fn(fn) {
+    this.#fn = fn;
+    this.cache.clear();
+    this.priority.clear();
   }
 
   #generateKey(arg) {
