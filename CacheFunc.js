@@ -4,18 +4,22 @@ const crypto = require('crypto');
 
 class CacheFunc {
   #fn;
+  #timeouts;
   constructor(fn, time, length = 10) {
     this.#fn = fn;
     this.cache = new Map();
     this.length = length;
     this.priority = new Map();
     this.time = time;
+    this.#timeouts = new Array();
   }
 
   set fn(fn) {
     this.#fn = fn;
     this.cache.clear();
     this.priority.clear();
+    this.#timeouts.map(clearTimeout);
+    this.#timeouts.splice(0);
   }
 
   #generateKey(arg) {
@@ -37,10 +41,13 @@ class CacheFunc {
   }
 
   #timeInCache(key, leadTime) {
-    setTimeout(() => {
-      this.cache.delete(key);
-      this.priority.delete(leadTime);
-    }, this.time);
+    this.#timeouts.push(
+      setTimeout(() => {
+        console.log('timeout here');
+        this.cache.delete(key);
+        this.priority.delete(leadTime);
+      }, this.time)
+    );
   }
 
   #checkCacheSize() {
