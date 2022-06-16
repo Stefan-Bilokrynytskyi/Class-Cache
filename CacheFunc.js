@@ -43,7 +43,6 @@ class CacheFunc {
   #timeInCache(key, leadTime) {
     this.#timeouts.push(
       setTimeout(() => {
-        console.log('timeout here');
         this.cache.delete(key);
         this.priority.delete(leadTime);
       }, this.time)

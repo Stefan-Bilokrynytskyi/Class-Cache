@@ -71,7 +71,21 @@ const timeInCache = () => {
   })();
 };
 
-const tests = [speedTest, priorityTest, timeInCache];
+const setFn = () => {
+  const cachedFib = new CacheFunc(fib, 2000, 3);
+  const args = [20, 15, 10];
+
+  const test = (val) => val++;
+
+  for (let i = 0; i < args.length; i++) {
+    cachedFib.calculate(args[i]);
+  }
+
+  cachedFib.fn = test;
+  assert.strictEqual(cachedFib.cache.size, 0, 'Method Set fn failed');
+};
+
+const tests = [speedTest, priorityTest, timeInCache, setFn];
 
 for (const test of tests) {
   try {
