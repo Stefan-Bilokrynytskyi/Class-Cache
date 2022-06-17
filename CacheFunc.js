@@ -25,7 +25,7 @@ class CacheFunc {
 
   set length(length) {
     this.#length = length;
-    this.#checkCacheSize();
+    while (this.cache.size !== this.#length) this.#checkCacheSize();
   }
 
   get timeouts() {

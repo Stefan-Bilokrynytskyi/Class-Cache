@@ -113,9 +113,9 @@ const sizeTest = () => {
   for (let i = 0; i < args.length; i++) {
     cachedFib.calculate(args[i]);
   }
-  cachedFib.length = 2;
+  cachedFib.length = 1;
 
-  assert.strictEqual(cachedFib.cache.size, 2, 'Length setter failed');
+  assert.strictEqual(cachedFib.cache.size, 1, 'Length setter failed');
 };
 
 const tests = [
