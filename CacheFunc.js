@@ -5,10 +5,11 @@ const crypto = require('crypto');
 class CacheFunc {
   #fn;
   #timeouts;
+  #length;
   constructor(fn, time, length = 10) {
     this.#fn = fn;
     this.cache = new Map();
-    this.length = length;
+    this.#length = length;
     this.priority = new Map();
     this.time = time;
     this.#timeouts = new Map();
@@ -20,6 +21,11 @@ class CacheFunc {
     this.priority.clear();
     for (const timeout of this.#timeouts.values()) clearTimeout(timeout);
     this.#timeouts.clear();
+  }
+
+  set length(length) {
+    this.#length = length;
+    this.#checkCacheSize();
   }
 
   get timeouts() {
@@ -57,7 +63,7 @@ class CacheFunc {
   }
 
   #checkCacheSize() {
-    if (this.cache.size < this.length) return;
+    if (this.cache.size < this.#length) return;
 
     let min = this.priority.keys().next().value;
     for (const time of this.priority.keys()) if (time < min) min = time;
