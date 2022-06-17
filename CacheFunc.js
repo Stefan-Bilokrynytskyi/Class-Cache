@@ -6,11 +6,12 @@ class CacheFunc {
   #fn;
   #timeouts;
   #length;
+  #priority;
   constructor(fn, time, length = 10) {
     this.#fn = fn;
     this.cache = new Map();
     this.#length = length;
-    this.priority = new Map();
+    this.#priority = new Map();
     this.time = time;
     this.#timeouts = new Map();
   }
@@ -18,7 +19,7 @@ class CacheFunc {
   set fn(fn) {
     this.#fn = fn;
     this.cache.clear();
-    this.priority.clear();
+    this.#priority.clear();
     for (const timeout of this.#timeouts.values()) clearTimeout(timeout);
     this.#timeouts.clear();
   }
@@ -56,7 +57,7 @@ class CacheFunc {
       setTimeout(() => {
         console.log('timeout here');
         this.cache.delete(key);
-        this.priority.delete(leadTime);
+        this.#priority.delete(leadTime);
         this.#timeouts.delete(key);
       }, this.time)
     );
@@ -65,14 +66,14 @@ class CacheFunc {
   #checkCacheSize() {
     if (this.cache.size < this.#length) return;
 
-    let min = this.priority.keys().next().value;
-    for (const time of this.priority.keys()) if (time < min) min = time;
+    let min = this.#priority.keys().next().value;
+    for (const time of this.#priority.keys()) if (time < min) min = time;
 
-    const key = this.priority.get(min);
+    const key = this.#priority.get(min);
     this.cache.delete(key);
     clearTimeout(this.#timeouts.get(key));
     this.#timeouts.delete(key);
-    this.priority.delete(min);
+    this.#priority.delete(min);
   }
 
   calculate(...args) {
@@ -90,7 +91,7 @@ class CacheFunc {
 
     this.#checkCacheSize();
     this.cache.set(key, value);
-    this.priority.set(leadTime, key);
+    this.#priority.set(leadTime, key);
     this.#timeInCache(key, leadTime);
     return value;
   }
