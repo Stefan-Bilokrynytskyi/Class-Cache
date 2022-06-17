@@ -22,6 +22,10 @@ class CacheFunc {
     this.#timeouts.clear();
   }
 
+  get timeouts() {
+    return this.#timeouts;
+  }
+
   #generateKey(arg) {
     const type = typeof arg;
     if (type === 'object') {
@@ -47,6 +51,7 @@ class CacheFunc {
         console.log('timeout here');
         this.cache.delete(key);
         this.priority.delete(leadTime);
+        this.#timeouts.delete(key);
       }, this.time)
     );
   }
