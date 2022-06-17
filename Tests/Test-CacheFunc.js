@@ -85,7 +85,28 @@ const setFn = () => {
   assert.strictEqual(cachedFib.cache.size, 0, 'Method Set fn failed');
 };
 
-const tests = [speedTest, priorityTest, timeInCache, setFn];
+const timeoutTest = () => {
+  const cachedFib = new CacheFunc(fib, 2000, 3);
+  const args = [20, 15, 10];
+
+  for (let i = 0; i < args.length; i++) {
+    cachedFib.calculate(args[i]);
+  }
+
+  assert.strictEqual(cachedFib.timeouts.size, 3, 'Timeout size exceeded');
+
+  const sleep = (msec) =>
+    new Promise((resolve) => {
+      setTimeout(resolve, msec);
+    });
+
+  (async () => {
+    await sleep(2000);
+    assert.strictEqual(cachedFib.timeouts.size, 0, 'Timeouts size not empty');
+  })();
+};
+
+const tests = [speedTest, priorityTest, timeInCache, setFn, timeoutTest];
 
 for (const test of tests) {
   try {
