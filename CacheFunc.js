@@ -11,15 +11,15 @@ class CacheFunc {
     this.length = length;
     this.priority = new Map();
     this.time = time;
-    this.#timeouts = new Array();
+    this.#timeouts = new Map();
   }
 
   set fn(fn) {
     this.#fn = fn;
     this.cache.clear();
     this.priority.clear();
-    this.#timeouts.map(clearTimeout);
-    this.#timeouts.splice(0);
+    for (const timeout of this.#timeouts.values()) clearTimeout(timeout);
+    this.#timeouts.clear();
   }
 
   #generateKey(arg) {
@@ -41,8 +41,10 @@ class CacheFunc {
   }
 
   #timeInCache(key, leadTime) {
-    this.#timeouts.push(
+    this.#timeouts.set(
+      key,
       setTimeout(() => {
+        console.log('timeout here');
         this.cache.delete(key);
         this.priority.delete(leadTime);
       }, this.time)
@@ -57,6 +59,8 @@ class CacheFunc {
 
     const key = this.priority.get(min);
     this.cache.delete(key);
+    clearTimeout(this.#timeouts.get(key));
+    this.#timeouts.delete(key);
     this.priority.delete(min);
   }
 
