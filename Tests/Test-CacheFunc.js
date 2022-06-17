@@ -106,7 +106,26 @@ const timeoutTest = () => {
   })();
 };
 
-const tests = [speedTest, priorityTest, timeInCache, setFn, timeoutTest];
+const sizeTest = () => {
+  const cachedFib = new CacheFunc(fib, 2000, 3);
+  const args = [20, 15, 10];
+
+  for (let i = 0; i < args.length; i++) {
+    cachedFib.calculate(args[i]);
+  }
+  cachedFib.length = 2;
+
+  assert.strictEqual(cachedFib.cache.size, 2, 'Length setter failed');
+};
+
+const tests = [
+  speedTest,
+  priorityTest,
+  timeInCache,
+  setFn,
+  timeoutTest,
+  sizeTest,
+];
 
 for (const test of tests) {
   try {
