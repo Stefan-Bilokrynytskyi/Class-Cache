@@ -23,7 +23,6 @@ class CacheFile {
   set maxSize(maxSize) {
     this.#maxSize = maxSize;
     while (this.#size > this.#maxSize) {
-      console.log(this.#priority);
       let min = this.#priority.keys().next().value;
       for (const size of this.#priority.keys()) if (size < min) min = size;
 
@@ -36,6 +35,9 @@ class CacheFile {
   }
 
   #checkCacheSize(fileSize) {
+    if (fileSize > this.#maxSize) {
+      throw new Error('File size exceeded cache size');
+    }
     if (this.#size + fileSize < this.#maxSize) {
       this.#size += fileSize;
       return;
@@ -63,8 +65,15 @@ class CacheFile {
         cb(record.err, record.data);
         return;
       }
+
       const fileSize = fs.statSync(...args).size / INC;
-      this.#checkCacheSize(fileSize);
+      try {
+        this.#checkCacheSize(fileSize);
+      } catch (err) {
+        console.log(err);
+        return;
+      }
+
       this.#priority.set(fileSize, key);
       fn(...args, (err, data) => {
         console.log('First reading');
@@ -76,21 +85,14 @@ class CacheFile {
   }
 }
 
-const test = new CacheFile(fs['readFile'], 5000, 10);
+const test = new CacheFile(fs['readFile'], 5000, 2);
 
 test.readFile('CacheFunc.js', 'UTF8', (err, data) => {
   if (err) console.log(err);
-
-  test.readFile('CacheFile.js', 'UTF8', (err, data) => {
+  else console.log(data.toString());
+  test.readFile('CacheFunc.js', 'UTF8', (err, data) => {
     if (err) console.log(err);
-    console.log(test.cache);
-    test.maxSize = 3;
-    console.log(test.cache);
+    else console.log(data.toString());
   });
 });
-
-/*
-console.log(fs.statSync('CacheFile.js', 'UTF8').size);
-console.log(fs.statSync('CacheFunc.js', 'UTF8').size);
-*/
 module.exports = CacheFile;
