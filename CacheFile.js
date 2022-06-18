@@ -23,7 +23,7 @@ class CacheFile {
     }
 
     let min = this.#priority.keys().next().value;
-    for (const time of this.#priority.keys()) if (time < min) min = time;
+    for (const size of this.#priority.keys()) if (size < min) min = size;
 
     const key = this.#priority.get(min);
     this.cache.delete(key);
@@ -38,16 +38,17 @@ class CacheFile {
       const cb = args.pop();
       const key = args[0];
       const record = this.cache.get(key);
-      const fileSize = fs.statSync(...args).size;
-      this.#checkCacheSize(fileSize / INC);
-      this.#priority.set(fileSize, key);
 
       if (record) {
         console.log('from cache');
         cb(record.err, record.data);
         return;
       }
+      const fileSize = fs.statSync(...args).size / INC;
+      this.#checkCacheSize(fileSize);
+      this.#priority.set(fileSize, key);
       fn(...args, (err, data) => {
+        console.log('First reading');
         this.cache.set(key, { err, data });
 
         cb(err, data);
@@ -55,5 +56,16 @@ class CacheFile {
     };
   }
 }
+
+const test = new CacheFile(fs['readFile'], 5000, 3);
+
+test.readFile('CacheFunc.js', 'UTF8', (err, data) => {
+  if (err) console.log(err);
+  console.log(test.cache);
+  test.readFile('CacheFile.js', 'UTF8', (err, data) => {
+    console.log(test.cache);
+    if (err) console.log(err);
+  });
+});
 
 module.exports = CacheFile;
