@@ -6,19 +6,38 @@ const INC = 1024;
 
 class CacheFile {
   #priority;
+  #timeouts;
+  #maxSize;
+  #size;
   constructor(fn, time, maxSize) {
     this.fn = fn;
     this.cache = new Map();
-    this.maxSize = maxSize;
-    this.size = 0;
+    this.#maxSize = maxSize;
+    this.#size = 0;
     this.#priority = new Map();
     this.time = time;
+    this.#timeouts = new Map();
     CacheFile.prototype[fn.name] = this.createMethod(fn);
   }
 
+  set maxSize(maxSize) {
+    this.#maxSize = maxSize;
+    while (this.#size > this.#maxSize) {
+      console.log(this.#priority);
+      let min = this.#priority.keys().next().value;
+      for (const size of this.#priority.keys()) if (size < min) min = size;
+
+      const key = this.#priority.get(min);
+      this.cache.delete(key);
+
+      this.#priority.delete(min);
+      this.#size -= min;
+    }
+  }
+
   #checkCacheSize(fileSize) {
-    if (this.size + fileSize < this.maxSize) {
-      this.size += fileSize;
+    if (this.#size + fileSize < this.#maxSize) {
+      this.#size += fileSize;
       return;
     }
 
@@ -29,7 +48,7 @@ class CacheFile {
     this.cache.delete(key);
 
     this.#priority.delete(min);
-    this.size -= min;
+    this.#size -= min;
     this.#checkCacheSize(fileSize);
   }
 
@@ -57,15 +76,21 @@ class CacheFile {
   }
 }
 
-const test = new CacheFile(fs['readFile'], 5000, 3);
+const test = new CacheFile(fs['readFile'], 5000, 10);
 
 test.readFile('CacheFunc.js', 'UTF8', (err, data) => {
   if (err) console.log(err);
-  console.log(test.cache);
+
   test.readFile('CacheFile.js', 'UTF8', (err, data) => {
-    console.log(test.cache);
     if (err) console.log(err);
+    console.log(test.cache);
+    test.maxSize = 3;
+    console.log(test.cache);
   });
 });
 
+/*
+console.log(fs.statSync('CacheFile.js', 'UTF8').size);
+console.log(fs.statSync('CacheFunc.js', 'UTF8').size);
+*/
 module.exports = CacheFile;
