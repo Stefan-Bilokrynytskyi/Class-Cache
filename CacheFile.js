@@ -28,10 +28,23 @@ class CacheFile {
 
       const key = this.#priority.get(min);
       this.cache.delete(key);
-
+      clearTimeout(this.#timeouts.get(key));
+      this.#timeouts.delete(key);
       this.#priority.delete(min);
       this.#size -= min;
     }
+  }
+
+  #timeInCache(key, fileSize) {
+    this.#timeouts.set(
+      key,
+      setTimeout(() => {
+        console.log('timeout here');
+        this.cache.delete(key);
+        this.#priority.delete(fileSize);
+        this.#timeouts.delete(key);
+      }, this.time)
+    );
   }
 
   #checkCacheSize(fileSize) {
@@ -51,6 +64,8 @@ class CacheFile {
 
     this.#priority.delete(min);
     this.#size -= min;
+    clearTimeout(this.#timeouts.get(key));
+    this.#timeouts.delete(key);
     this.#checkCacheSize(fileSize);
   }
 
@@ -81,18 +96,28 @@ class CacheFile {
 
         cb(err, data);
       });
+      this.#timeInCache(key, fileSize);
     };
   }
 }
 
-const test = new CacheFile(fs['readFile'], 5000, 2);
+const test = new CacheFile(fs['readFile'], 5000, 3);
 
 test.readFile('CacheFunc.js', 'UTF8', (err, data) => {
   if (err) console.log(err);
-  else console.log(data.toString());
-  test.readFile('CacheFunc.js', 'UTF8', (err, data) => {
+
+  test.readFile('CacheFile.js', 'UTF8', (err, data) => {
     if (err) console.log(err);
-    else console.log(data.toString());
+    const sleep = (msec) =>
+      new Promise((resolve) => {
+        setTimeout(resolve, msec);
+      });
+    console.log(test.cache);
+    (async () => {
+      await sleep(5000);
+      console.log(test.cache);
+    })();
   });
 });
+
 module.exports = CacheFile;
