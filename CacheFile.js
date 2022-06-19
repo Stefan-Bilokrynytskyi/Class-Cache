@@ -10,14 +10,17 @@ class CacheFile {
   #maxSize;
   #size;
   constructor(fn, time, maxSize) {
-    this.fn = fn;
     this.cache = new Map();
     this.#maxSize = maxSize;
     this.#size = 0;
     this.#priority = new Map();
     this.time = time;
     this.#timeouts = new Map();
-    CacheFile.prototype[fn.name] = this.createMethod(fn);
+    CacheFile.prototype[fn.name] = this.#createMethod(fn);
+  }
+
+  addMethod(fn) {
+    CacheFile.prototype[fn.name] = this.#createMethod(fn);
   }
 
   set maxSize(maxSize) {
@@ -69,10 +72,10 @@ class CacheFile {
     this.#checkCacheSize(fileSize);
   }
 
-  createMethod(fn) {
+  #createMethod(fn) {
     return (...args) => {
       const cb = args.pop();
-      const key = args[0];
+      const key = args[0] + fn.name;
       const record = this.cache.get(key);
 
       if (record) {
@@ -101,23 +104,29 @@ class CacheFile {
   }
 }
 
-const test = new CacheFile(fs['readFile'], 5000, 3);
+const test = new CacheFile(fs['readFile'], 5000, 10);
+test.addMethod(fs['lstat']);
 
 test.readFile('CacheFunc.js', 'UTF8', (err, data) => {
   if (err) console.log(err);
 
-  test.readFile('CacheFile.js', 'UTF8', (err, data) => {
+  test.lstat('CacheFunc.js', (err, data) => {
     if (err) console.log(err);
-    const sleep = (msec) =>
-      new Promise((resolve) => {
-        setTimeout(resolve, msec);
-      });
-    console.log(test.cache);
-    (async () => {
-      await sleep(5000);
-      console.log(test.cache);
-    })();
+    console.log(data);
   });
 });
+fs.lstat('CacheFunc.js', (err, data) => {
+  if (err) console.log(err);
+  console.log(data);
+});
+console.log(test.cache);
+/*
+const sleep = (msec) =>
+  new Promise((resolve) => {
+    setTimeout(resolve, msec);
+  });
 
+(async () => {
+  await sleep(10000);
+})();*/
 module.exports = CacheFile;
