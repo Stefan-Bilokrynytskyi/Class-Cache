@@ -3,7 +3,6 @@
 const fs = require('fs');
 
 const INC = 1024;
-
 class CacheFile {
   #priority;
   #timeouts;
@@ -17,6 +16,9 @@ class CacheFile {
     this.time = time;
     this.#timeouts = new Map();
     CacheFile.prototype[fn.name] = this.#createMethod(fn);
+  }
+  get size() {
+    return this.#size;
   }
 
   addMethod(fn) {
@@ -43,6 +45,7 @@ class CacheFile {
       key,
       setTimeout(() => {
         console.log('timeout here');
+        this.#size -= fileSize;
         this.cache.delete(key);
         this.#priority.delete(fileSize);
         this.#timeouts.delete(key);
@@ -79,7 +82,6 @@ class CacheFile {
       const record = this.cache.get(key);
 
       if (record) {
-        console.log('from cache');
         cb(record.err, record.data);
         return;
       }
@@ -104,29 +106,4 @@ class CacheFile {
   }
 }
 
-const test = new CacheFile(fs['readFile'], 5000, 10);
-test.addMethod(fs['lstat']);
-
-test.readFile('CacheFunc.js', 'UTF8', (err, data) => {
-  if (err) console.log(err);
-
-  test.lstat('CacheFunc.js', (err, data) => {
-    if (err) console.log(err);
-    console.log(data);
-  });
-});
-fs.lstat('CacheFunc.js', (err, data) => {
-  if (err) console.log(err);
-  console.log(data);
-});
-console.log(test.cache);
-/*
-const sleep = (msec) =>
-  new Promise((resolve) => {
-    setTimeout(resolve, msec);
-  });
-
-(async () => {
-  await sleep(10000);
-})();*/
 module.exports = CacheFile;
