@@ -2,7 +2,6 @@
 
 const fs = require('fs');
 
-const INC = 1024;
 class CacheFile {
   #priority;
   #timeouts;
@@ -17,8 +16,17 @@ class CacheFile {
     this.#timeouts = new Map();
     CacheFile.prototype[fn.name] = this.#createMethod(fn);
   }
+
   get size() {
     return this.#size;
+  }
+
+  clear() {
+    this.cache.clear();
+    this.#size = 0;
+    this.#priority.clear();
+    for (const timeout of this.#timeouts.values()) clearTimeout(timeout);
+    this.#timeouts.clear();
   }
 
   addMethod(fn) {
@@ -27,6 +35,7 @@ class CacheFile {
 
   set maxSize(maxSize) {
     this.#maxSize = maxSize;
+
     while (this.#size > this.#maxSize) {
       let min = this.#priority.keys().next().value;
       for (const size of this.#priority.keys()) if (size < min) min = size;
@@ -77,6 +86,7 @@ class CacheFile {
 
   #createMethod(fn) {
     return (...args) => {
+      const INC = 1024;
       const cb = args.pop();
       const key = args[0] + fn.name;
       const record = this.cache.get(key);
@@ -87,6 +97,7 @@ class CacheFile {
       }
 
       const fileSize = fs.statSync(...args).size / INC;
+      //console.log(fileSize);
       try {
         this.#checkCacheSize(fileSize);
       } catch (err) {

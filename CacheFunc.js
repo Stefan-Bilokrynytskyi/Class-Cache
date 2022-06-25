@@ -76,7 +76,7 @@ class CacheFunc {
     this.#priority.delete(min);
   }
 
-  calculate(...args) {
+  do(...args) {
     let key = args.map(this.#generateKey).join('|');
     key = this.#keyToHash(key);
 

@@ -21,7 +21,7 @@ const speedTest = () => {
 
   start = new Date().getTime();
   for (let i = 0; i < LOOP_COUNT; i++) {
-    tmp.push(cachedFib.calculate(fibArg));
+    tmp.push(cachedFib.do(fibArg));
   }
   end = new Date().getTime();
   const time2 = end - start;
@@ -38,7 +38,7 @@ const priorityTest = () => {
   const cacheResults = [];
 
   for (let i = 0; i < args1.length; i++) {
-    cachedFib.calculate(args1[i]);
+    cachedFib.do(args1[i]);
   }
 
   for (let i = 0; i < args2.length; i++) {
@@ -57,7 +57,7 @@ const timeInCache = () => {
   const args = [20, 15, 10];
 
   for (let i = 0; i < args.length; i++) {
-    cachedFib.calculate(args[i]);
+    cachedFib.do(args[i]);
   }
 
   const sleep = (msec) =>
@@ -78,7 +78,7 @@ const setFn = () => {
   const test = (val) => val++;
 
   for (let i = 0; i < args.length; i++) {
-    cachedFib.calculate(args[i]);
+    cachedFib.do(args[i]);
   }
 
   cachedFib.fn = test;
@@ -90,7 +90,7 @@ const timeoutTest = () => {
   const args = [20, 15, 10];
 
   for (let i = 0; i < args.length; i++) {
-    cachedFib.calculate(args[i]);
+    cachedFib.do(args[i]);
   }
 
   assert.strictEqual(cachedFib.timeouts.size, 3, 'Timeout size exceeded');
@@ -111,7 +111,7 @@ const sizeTest = () => {
   const args = [20, 15, 10];
 
   for (let i = 0; i < args.length; i++) {
-    cachedFib.calculate(args[i]);
+    cachedFib.do(args[i]);
   }
   cachedFib.length = 1;
 
