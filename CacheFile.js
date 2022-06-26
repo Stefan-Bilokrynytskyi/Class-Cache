@@ -1,6 +1,7 @@
 'use strict';
 
 const fs = require('fs');
+const crypto = require('crypto');
 
 class CacheFile {
   #priority;
@@ -35,7 +36,6 @@ class CacheFile {
 
   set maxSize(maxSize) {
     this.#maxSize = maxSize;
-
     while (this.#size > this.#maxSize) {
       let min = this.#priority.keys().next().value;
       for (const size of this.#priority.keys()) if (size < min) min = size;
@@ -47,6 +47,18 @@ class CacheFile {
       this.#priority.delete(min);
       this.#size -= min;
     }
+  }
+
+  #generateKey(args, fnName) {
+    let key = '';
+    for (let i = 0; i < args.length; i++) {
+      key += JSON.stringify(args[i]) + ':' + typeof args[i] + '-';
+    }
+    key += fnName;
+
+    key = crypto.createHash('sha256').update(key).digest('hex');
+
+    return key;
   }
 
   #timeInCache(key, fileSize) {
@@ -88,13 +100,14 @@ class CacheFile {
     return (...args) => {
       const INC = 1024;
       const cb = args.pop();
-      const key = args[0] + fn.name;
+      const key = this.#generateKey(args, fn.name);
       const record = this.cache.get(key);
 
       if (record) {
         cb(record.err, record.data);
         return;
       }
+      console.log(args);
 
       const fileSize = fs.statSync(...args).size / INC;
       //console.log(fileSize);

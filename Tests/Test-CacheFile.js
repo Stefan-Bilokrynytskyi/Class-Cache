@@ -26,7 +26,7 @@ const speedTest = () => {
   (async () => {
     let start = new Date().getTime();
     for (let i = 0; i < LOOP_COUNT; i++) {
-      await readfile1('Test.txt', 'UTF8');
+      await readfile1('Test.txt', 'utf8');
     }
     let end = new Date().getTime();
 
@@ -35,7 +35,7 @@ const speedTest = () => {
 
     start = new Date().getTime();
     for (let i = 0; i < LOOP_COUNT; i++) {
-      await readfile2('Test.txt', 'UTF8');
+      await readfile2('Test.txt', 'utf8');
     }
     end = new Date().getTime();
 
@@ -48,10 +48,10 @@ const speedTest = () => {
 const maxSizeTest = () => {
   const cachedFS = new CacheFile(fs['readFile'], 2000, 10);
 
-  cachedFS.readFile('Test-CacheFunc.js', 'UTF8', (err, data) => {
+  cachedFS.readFile('Test-CacheFunc.js', 'utf8', (err, data) => {
     if (err) console.log(err);
 
-    cachedFS.readFile('Test-CacheFile.js', 'UTF8', (err, data) => {
+    cachedFS.readFile('Test-CacheFile.js', 'utf8', (err, data) => {
       if (err) console.log(err);
       console.log(cachedFS.size);
       cachedFS.maxSize = 5;
@@ -74,15 +74,33 @@ const clearTest = () => {
     );
 
   (async () => {
-    await readfile('Test.txt', 'UTF8');
-    await readfile('../CacheFile.js', 'UTF8');
+    await readfile('Test.txt', 'utf8');
+    await readfile('../CacheFile.js', 'utf8');
     cachedFS.clear();
     console.log('I am here');
     assert.strictEqual(cachedFS.cache.size, 0, 'Cache is not empty');
   })();
 };
 
-const tests = [clearTest, maxSizeTest, speedTest];
+const checkTimeIncache = () => {
+  const cachedFS = new CacheFile(fs['readFile'], 2000, 100);
+
+  cachedFS.readFile('Test-CacheFile.js', 'utf8', (err, data) => {
+    if (err) console.log(err);
+
+    const sleep = (msec) =>
+      new Promise((resolve) => {
+        setTimeout(resolve, msec);
+      });
+
+    (async () => {
+      await sleep(2000);
+      assert.strictEqual(cachedFS.cache.size, 0, 'Cache is not empty');
+    })();
+  });
+};
+
+const tests = [checkTimeIncache, clearTest, maxSizeTest, speedTest];
 
 for (const test of tests) {
   try {
