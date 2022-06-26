@@ -99,6 +99,7 @@ class CacheFile {
   #createMethod(fn) {
     return (...args) => {
       const INC = 1024;
+      const path = args[0];
       const cb = args.pop();
       const key = this.#generateKey(args, fn.name);
       const record = this.cache.get(key);
@@ -107,9 +108,8 @@ class CacheFile {
         cb(record.err, record.data);
         return;
       }
-      console.log(args);
 
-      const fileSize = fs.statSync(...args).size / INC;
+      const fileSize = fs.statSync(path).size / INC;
       //console.log(fileSize);
       try {
         this.#checkCacheSize(fileSize);
@@ -129,5 +129,7 @@ class CacheFile {
     };
   }
 }
+
+//fs.lstat, fs.readFile
 
 module.exports = CacheFile;

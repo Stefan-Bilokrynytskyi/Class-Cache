@@ -16,12 +16,16 @@ class CacheFunc {
     this.#timeouts = new Map();
   }
 
-  set fn(fn) {
-    this.#fn = fn;
+  clear() {
     this.cache.clear();
     this.#priority.clear();
     for (const timeout of this.#timeouts.values()) clearTimeout(timeout);
     this.#timeouts.clear();
+  }
+
+  set fn(fn) {
+    this.#fn = fn;
+    this.clear();
   }
 
   set length(length) {
