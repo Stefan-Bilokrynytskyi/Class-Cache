@@ -26,7 +26,7 @@ const speedTest = () => {
   (async () => {
     let start = new Date().getTime();
     for (let i = 0; i < LOOP_COUNT; i++) {
-      await readfile1('Test.txt', 'utf8');
+      await readfile1('Class-Cache/Tests/Test.txt', 'utf8');
     }
     let end = new Date().getTime();
 
@@ -35,7 +35,7 @@ const speedTest = () => {
 
     start = new Date().getTime();
     for (let i = 0; i < LOOP_COUNT; i++) {
-      await readfile2('Test.txt', 'utf8');
+      await readfile2('Class-Cache/Tests/Test.txt', 'utf8');
     }
     end = new Date().getTime();
 
@@ -48,10 +48,10 @@ const speedTest = () => {
 const maxSizeTest = () => {
   const cachedFS = new CacheFile(fs['readFile'], 2000, 10);
 
-  cachedFS.readFile('Test-CacheFunc.js', 'utf8', (err, data) => {
+  cachedFS.readFile('Class-Cache/Tests/Test-CacheFunc.js', 'utf8', (err, data) => {
     if (err) console.log(err);
 
-    cachedFS.readFile('Test-CacheFile.js', 'utf8', (err, data) => {
+    cachedFS.readFile('Class-Cache/Tests/Test-CacheFile.js', 'utf8', (err, data) => {
       if (err) console.log(err);
       console.log(cachedFS.size);
       cachedFS.maxSize = 5;
@@ -74,8 +74,8 @@ const clearTest = () => {
     );
 
   (async () => {
-    await readfile('Test.txt', 'utf8');
-    await readfile('../CacheFile.js', 'utf8');
+    await readfile('Class-Cache/Tests/Test.txt', 'utf8');
+    await readfile('Class-Cache/CacheFile.js', 'utf8');
     cachedFS.clear();
     console.log('I am here');
     assert.strictEqual(cachedFS.cache.size, 0, 'Cache is not empty');
@@ -85,7 +85,7 @@ const clearTest = () => {
 const checkTimeInCache = () => {
   const cachedFS = new CacheFile(fs['readFile'], 2000, 100);
 
-  cachedFS.readFile('Test-CacheFile.js', 'utf8', (err, data) => {
+  cachedFS.readFile('Class-Cache/Tests/Test-CacheFile.js', 'utf8', (err, data) => {
     if (err) console.log(err);
 
     const sleep = (msec) =>
