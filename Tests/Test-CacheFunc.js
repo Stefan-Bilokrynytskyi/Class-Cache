@@ -118,6 +118,18 @@ const sizeTest = () => {
   assert.strictEqual(cachedFib.cache.size, 1, 'Length setter failed');
 };
 
+const clearTest = () => {
+  const cachedFib = new CacheFunc(fib, 3000, 3);
+  const args = [15, 10, 25];
+
+  for (let i = 0; i < args.length; i++) {
+    cachedFib.do(args[i]);
+  }
+  cachedFib.clear();
+  assert.strictEqual(cachedFib.cache.size, 0, 'Cache is not empty');
+  console.log(cachedFib.cache.size);
+};
+
 const tests = [
   speedTest,
   priorityTest,
@@ -125,6 +137,7 @@ const tests = [
   setFn,
   timeoutTest,
   sizeTest,
+  clearTest,
 ];
 
 for (const test of tests) {
