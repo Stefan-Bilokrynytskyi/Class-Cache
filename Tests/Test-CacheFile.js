@@ -100,7 +100,31 @@ const checkTimeInCache = () => {
   });
 };
 
-const tests = [checkTimeInCache, clearTest, maxSizeTest, speedTest];
+const priorityTest = () => {
+  const INC = 1024;
+  const size1 = fs.statSync('Class-Cache/Tests/Test.txt').size;
+  const size2 = fs.statSync('Class-Cache/Tests/Test-CacheFile.js').size;
+  const size3 = fs.statSync('Class-Cache/Tests/Test-CacheFunc.js').size;
+  const cacheSize = (size1 + size2 + 1) / INC;
+  const cachedFS = new CacheFile(fs['readFile'], 3000, cacheSize);
+  const requiredSize = (size1 + size3) / INC;
+
+  cachedFS.readFile('Class-Cache/Tests/Test.txt', 'utf8', (err, data) => {
+    if (err) console.log(err);
+
+    cachedFS.readFile('Class-Cache/Tests/Test-CacheFile.js', 'utf8', (err, data) => {
+      if (err) console.log(err);
+
+      cachedFS.readFile('Class-Cache/Tests/Test-CacheFunc.js', 'utf8', (err, data) => {
+        if (err) console.log(err);
+
+        assert.strictEqual(cachedFS.size, requiredSize, 'Priority test failed');
+      });
+    });
+  });
+};
+
+const tests = [checkTimeInCache, clearTest, maxSizeTest, speedTest, priorityTest];
 
 for (const test of tests) {
   try {
