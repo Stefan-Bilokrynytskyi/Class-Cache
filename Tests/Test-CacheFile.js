@@ -57,7 +57,7 @@ const maxSizeTest = () => {
       cachedFS.maxSize = 5;
 
       console.log(cachedFS.cache);
-      assert.strictEqual(cachedFS.cache.size, 1, 'Cache is not empty');
+      assert.strictEqual(cachedFS.cache.size, 1, 'Max size failed');
     });
   });
 };
@@ -82,7 +82,7 @@ const clearTest = () => {
   })();
 };
 
-const checkTimeIncache = () => {
+const checkTimeInCache = () => {
   const cachedFS = new CacheFile(fs['readFile'], 2000, 100);
 
   cachedFS.readFile('Test-CacheFile.js', 'utf8', (err, data) => {
@@ -100,7 +100,7 @@ const checkTimeIncache = () => {
   });
 };
 
-const tests = [checkTimeIncache, clearTest, maxSizeTest, speedTest];
+const tests = [checkTimeInCache, clearTest, maxSizeTest, speedTest];
 
 for (const test of tests) {
   try {

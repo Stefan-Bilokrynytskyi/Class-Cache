@@ -22,6 +22,10 @@ class CacheFile {
     return this.#size;
   }
 
+  get priority() {
+    return this.#priority;
+  }
+
   clear() {
     this.cache.clear();
     this.#size = 0;
@@ -105,6 +109,7 @@ class CacheFile {
       const record = this.cache.get(key);
 
       if (record) {
+        console.log('from cache');
         cb(record.err, record.data);
         return;
       }
@@ -129,7 +134,5 @@ class CacheFile {
     };
   }
 }
-
-//fs.lstat, fs.readFile
 
 module.exports = CacheFile;

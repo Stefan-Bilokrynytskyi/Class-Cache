@@ -30,11 +30,8 @@ class CacheFunc {
 
   set length(length) {
     this.#length = length;
-    while (this.cache.size !== this.#length) this.#checkCacheSize();
-  }
-
-  get timeouts() {
-    return this.#timeouts;
+    if (this.cache.size < this.#length) return;
+    else while (this.cache.size !== this.#length) this.#checkCacheSize();
   }
 
   #generateKey(arg) {
