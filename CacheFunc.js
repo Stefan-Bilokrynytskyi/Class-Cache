@@ -34,6 +34,10 @@ class CacheFunc {
     else while (this.cache.size !== this.#length) this.#checkCacheSize();
   }
 
+  get timeouts() {
+    return this.#timeouts;
+  }
+
   #generateKey(arg) {
     const type = typeof arg;
     if (type === 'object') {
