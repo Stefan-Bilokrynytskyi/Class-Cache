@@ -134,7 +134,7 @@ cachedFS.lstat('Class-Cache/Tests/Test.txt', 'utf8', (err, data) => {
   });
 };
 
-const tests = [checkTimeInCache, clearTest, maxSizeTest, speedTest, priorityTest, addMethodTest];
+const tests = [checkTimeInCache, clearTest, maxSizeTest, speedTest, addMethodTest, priorityTest];
 
 for (const test of tests) {
   try {
