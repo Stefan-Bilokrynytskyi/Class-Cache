@@ -109,7 +109,6 @@ class CacheFile {
       const record = this.cache.get(key);
 
       if (record) {
-        console.log('from cache');
         cb(record.err, record.data);
         return;
       }
