@@ -60,7 +60,6 @@ class CacheFunc {
     this.#timeouts.set(
       key,
       setTimeout(() => {
-        console.log('timeout here');
         this.cache.delete(key);
         this.#priority.delete(leadTime);
         this.#timeouts.delete(key);

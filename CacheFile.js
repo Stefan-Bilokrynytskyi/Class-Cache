@@ -69,7 +69,6 @@ class CacheFile {
     this.#timeouts.set(
       key,
       setTimeout(() => {
-        console.log('timeout here');
         this.#size -= fileSize;
         this.cache.delete(key);
         this.#priority.delete(fileSize);
@@ -124,7 +123,6 @@ class CacheFile {
 
       this.#priority.set(fileSize, key);
       fn(...args, (err, data) => {
-        console.log('First reading');
         this.cache.set(key, { err, data });
 
         cb(err, data);

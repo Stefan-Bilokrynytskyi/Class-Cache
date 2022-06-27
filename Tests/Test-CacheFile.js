@@ -26,7 +26,7 @@ const speedTest = () => {
   (async () => {
     let start = new Date().getTime();
     for (let i = 0; i < LOOP_COUNT; i++) {
-      await readfile1('Class-Cache/Tests/Test.txt', 'utf8');
+      await readfile1('Test.txt', 'utf8');
     }
     let end = new Date().getTime();
 
@@ -35,7 +35,7 @@ const speedTest = () => {
 
     start = new Date().getTime();
     for (let i = 0; i < LOOP_COUNT; i++) {
-      await readfile2('Class-Cache/Tests/Test.txt', 'utf8');
+      await readfile2('Test.txt', 'utf8');
     }
     end = new Date().getTime();
 
@@ -48,15 +48,14 @@ const speedTest = () => {
 const maxSizeTest = () => {
   const cachedFS = new CacheFile(fs['readFile'], 2000, 10);
 
-  cachedFS.readFile('Class-Cache/Tests/Test-CacheFunc.js', 'utf8', (err, data) => {
+  cachedFS.readFile('Test-CacheFunc.js', 'utf8', (err, data) => {
     if (err) console.log(err);
 
-    cachedFS.readFile('Class-Cache/Tests/Test-CacheFile.js', 'utf8', (err, data) => {
+    cachedFS.readFile('Test-CacheFile.js', 'utf8', (err, data) => {
       if (err) console.log(err);
-      console.log(cachedFS.size);
+
       cachedFS.maxSize = 5;
 
-      console.log(cachedFS.cache);
       assert.strictEqual(cachedFS.cache.size, 1, 'Max size failed');
     });
   });
@@ -74,10 +73,10 @@ const clearTest = () => {
     );
 
   (async () => {
-    await readfile('Class-Cache/Tests/Test.txt', 'utf8');
-    await readfile('Class-Cache/CacheFile.js', 'utf8');
+    await readfile('Test.txt', 'utf8');
+    await readfile('../CacheFile.js', 'utf8');
     cachedFS.clear();
-    console.log('I am here');
+
     assert.strictEqual(cachedFS.cache.size, 0, 'Cache is not empty');
   })();
 };
@@ -85,7 +84,7 @@ const clearTest = () => {
 const checkTimeInCache = () => {
   const cachedFS = new CacheFile(fs['readFile'], 2000, 100);
 
-  cachedFS.readFile('Class-Cache/Tests/Test-CacheFile.js', 'utf8', (err, data) => {
+  cachedFS.readFile('Test-CacheFile.js', 'utf8', (err, data) => {
     if (err) console.log(err);
 
     const sleep = (msec) =>
@@ -102,20 +101,20 @@ const checkTimeInCache = () => {
 
 const priorityTest = () => {
   const INC = 1024;
-  const size1 = fs.statSync('Class-Cache/Tests/Test.txt').size;
-  const size2 = fs.statSync('Class-Cache/Tests/Test-CacheFile.js').size;
-  const size3 = fs.statSync('Class-Cache/Tests/Test-CacheFunc.js').size;
+  const size1 = fs.statSync('Test.txt').size;
+  const size2 = fs.statSync('Test-CacheFile.js').size;
+  const size3 = fs.statSync('Test-CacheFunc.js').size;
   const cacheSize = (size1 + size2 + 1) / INC;
   const cachedFS = new CacheFile(fs['readFile'], 3000, cacheSize);
   const requiredSize = (size1 + size3) / INC;
 
-  cachedFS.readFile('Class-Cache/Tests/Test.txt', 'utf8', (err, data) => {
+  cachedFS.readFile('Test.txt', 'utf8', (err, data) => {
     if (err) console.log(err);
 
-    cachedFS.readFile('Class-Cache/Tests/Test-CacheFile.js', 'utf8', (err, data) => {
+    cachedFS.readFile('Test-CacheFile.js', 'utf8', (err, data) => {
       if (err) console.log(err);
 
-      cachedFS.readFile('Class-Cache/Tests/Test-CacheFunc.js', 'utf8', (err, data) => {
+      cachedFS.readFile('Test-CacheFunc.js', 'utf8', (err, data) => {
         if (err) console.log(err);
 
         assert.strictEqual(cachedFS.size, requiredSize, 'Priority test failed');
@@ -124,17 +123,24 @@ const priorityTest = () => {
   });
 };
 
-const addMethodTest = () =>  {
-  const cachedFS = new CacheFile(fs['readFile'], 2000, 100);
+const addMethodTest = () => {
+  const cachedFS = new CacheFile(fs['readFile'], 2000, 1000);
   cachedFS.addMethod(fs['lstat']);
 
-cachedFS.lstat('Class-Cache/Tests/Test.txt', 'utf8', (err, data) => {
-  if (err) console.log(err);
-  assert.strictEqual(cachedFS.cache.size, 1, 'Lstat is not working');
+  cachedFS.lstat('Test.txt', 'utf8', (err, data) => {
+    if (err) console.log(err);
+    assert.strictEqual(cachedFS.cache.size, 1, 'Lstat is not working');
   });
 };
 
-const tests = [checkTimeInCache, clearTest, maxSizeTest, speedTest, addMethodTest, priorityTest];
+const tests = [
+  checkTimeInCache,
+  clearTest,
+  maxSizeTest,
+  speedTest,
+  addMethodTest,
+  priorityTest,
+];
 
 for (const test of tests) {
   try {

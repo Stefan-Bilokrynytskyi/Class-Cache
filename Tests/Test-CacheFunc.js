@@ -46,8 +46,7 @@ const priorityTest = () => {
   }
 
   for (const val of cachedFib.cache.values()) cacheResults.push(val);
-  console.log(fibResults);
-  console.log(cacheResults);
+
   assert.deepEqual(fibResults, cacheResults, 'Priority test failed');
 };
 
@@ -127,7 +126,6 @@ const clearTest = () => {
   }
   cachedFib.clear();
   assert.strictEqual(cachedFib.cache.size, 0, 'Cache is not empty');
-  console.log(cachedFib.cache.size);
 };
 
 const tests = [
