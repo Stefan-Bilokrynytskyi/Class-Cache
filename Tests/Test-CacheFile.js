@@ -124,7 +124,17 @@ const priorityTest = () => {
   });
 };
 
-const tests = [checkTimeInCache, clearTest, maxSizeTest, speedTest, priorityTest];
+const addMethodTest = () =>  {
+  const cachedFS = new CacheFile(fs['readFile'], 2000, 100);
+  cachedFS.addMethod(fs['lstat']);
+
+cachedFS.lstat('Class-Cache/Tests/Test.txt', 'utf8', (err, data) => {
+  if (err) console.log(err);
+  assert.strictEqual(cachedFS.cache.size, 1, 'Lstat is not working');
+  });
+};
+
+const tests = [checkTimeInCache, clearTest, maxSizeTest, speedTest, priorityTest, addMethodTest];
 
 for (const test of tests) {
   try {
